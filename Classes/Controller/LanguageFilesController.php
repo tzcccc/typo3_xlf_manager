@@ -114,7 +114,7 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 			}
 		}
 		//calculate focus offset update depending on count of variables to show
-		$variablesFocusPixelsToSubtract = (($variablesToShowCount - 1) * 38 / 2) - 17;
+		$variablesFocusPixelsToSubtract = ($variablesToShowCount * 38 / 2) - 17;
 
 		//assign view variables
 		$this->view->assign('extensionSettings',$this->extensionSettings);
@@ -229,6 +229,7 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 			$this->view->assign('data',$DATA);
 			$this->view->assign('currentFileName',$fileName);
 			$this->view->assign('extension',$fileData['extension']);
+			$this->view->assign('fileFolder',$fileData['folder']);
 		}
 
 

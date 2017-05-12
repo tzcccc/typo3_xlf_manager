@@ -133,37 +133,7 @@
 											<f:if condition="{id.cat}">
 												<span id="cat{id.cat}" class="row cat">{id.cat}</span>
 											</f:if>
-											<span class="row id">
-												<div class="show-variables" tabindex="-1">
-													<div class="inner">
-														<f:if condition="{extensionSettings.showVariableFluidStandard}">
-															<input type="text" readonly value="&lt;f:translate key=&quot;LLL:EXT:cccc_language_files/Resources/Private/Language/locallang.xlf:{idName}&quot; /&gt;" />
-														</f:if>
-														<f:if condition="{extensionSettings.showVariableFluidInline}">
-															<input type="text" readonly value="&lbrace;f:translate(key:&apos;LLL:EXT:cccc_language_files/Resources/Private/Language/locallang.xlf:{idName}&apos;)&rbrace;" />
-														</f:if>
-														<f:if condition="{extensionSettings.showVariablePHP}">
-															<input type="text" readonly value="\TYPO3\CMS\Extbase\Utility\LocalizationUtility::translate('LLL:EXT:cccc_language_files/Resources/Private/Language/locallang.xlf:{idName}','')" />
-														</f:if>
-														<f:if condition="{extensionSettings.showVariableTypoScript}">
-															<input type="text" readonly value=".data = LLL:EXT:cccc_language_files/Resources/Private/Language/locallang.xlf:{idName}" />
-														</f:if>
-													</div>
-													<span class="btn btn-default to-close">
-														<f:render section="icon" arguments="{title:'close',T3iconPath:'actions/actions-document-close.svg',typo3SitePath:'{typo3SitePath}'}" />
-													</span>
-												</div>
-												<div class="input-group">
-													<a class="js-deletekey btn btn-default input-group-addon input-group-icon">
-														<f:render section="icon" arguments="{title:'delete translation variable',T3iconPath:'actions/actions-edit-delete.svg',typo3SitePath:'{typo3SitePath}'}" />
-													</a>
-													<input type="text" class="keyid t3-form-suggest form-control" disabled value="{idName}" />
-													<span class="btn btn-default input-group-addon input-group-icon">
-														<f:render section="icon" arguments="{T3iconPath:'actions/actions-document-view.svg',typo3SitePath:'{typo3SitePath}'}" />
-													</span>
-												</div>
-												<input type="hidden" name="xliff[{fileName}__{lang}__{idName}]" value="{idName}" />
-											</span>
+											<f:render section="variable-master" arguments="{extensionSettings:'{extensionSettings}',extension:'{extension}',currentFileName:'{currentFileName}',idName:'{idName}',typo3SitePath:'{typo3SitePath}'}" />
 										</f:for>
 									</div>
 								</f:if>
@@ -215,11 +185,15 @@
 	</f:form>
 
 	<script>
-		window.variableMasterHTML = '<textarea title="show translation variable" readonly="readonly" tabindex="-1"></textarea><div class="input-group"><a class="js-deletekey btn btn-default input-group-addon input-group-icon"><f:render section="icon" arguments="{title:'delete translation variable',T3iconPath:'actions/actions-edit-delete.svg',typo3SitePath:'{typo3SitePath}'}" /></a><input type="text" class="keyid t3-form-suggest form-control" disabled /><span class="btn btn-default input-group-addon input-group-icon"><f:render section="icon" arguments="{T3iconPath:'actions/actions-document-view.svg',typo3SitePath:'{typo3SitePath}'}" /></span></div><input type="hidden" name="" value="" />';
+		window.variableKeyPath = 'LLL:EXT:{extension}/Resources/Private/Language/{currentFileName}:';
+		window.variableMasterHTML = '<f:render section="variable-master" arguments="{extensionSettings:'{extensionSettings}',extension:'{extension}',currentFileName:'{currentFileName}',idName:'',typo3SitePath:'{typo3SitePath}'}" />';
 		window.inputMasterHTML = '<div class="input-group"><span class="input-group-addon"><f:render section="icon" arguments="{iconFullPath:'{typo3SitePath}typo3/sysext/core/Resources/Public/Icons/Flags/SVG/'}" /> </span><input class="lang t3-form-suggest form-control" type="text" name="" value="" tabindex=""><span class="after"></span><span class="btn btn-default to-close"><f:render section="icon" arguments="{title:'close',T3iconPath:'actions/actions-document-close.svg',typo3SitePath:'{typo3SitePath}'}" /></span></div>';
 	</script>
 
 </f:section>
+
+<f:comment><!--Render variable master--></f:comment>
+<f:section name="variable-master"><span class="row id"><div class="show-variables" tabindex="-1"><div class="inner"><f:if condition="{extensionSettings.showVariableFluidStandard}"><input type="text" readonly value="&lt;f:translate key=&quot;LLL:EXT:{extension}/Resources/Private/Language/{currentFileName}:{idName}&quot; /&gt;"/></f:if><f:if condition="{extensionSettings.showVariableFluidInline}"><input type="text" readonly value="&lbrace;f:translate(key:&apos;LLL:EXT:{extension}/Resources/Private/Language/{currentFileName}:{idName}&apos;)&rbrace;"/></f:if><f:if condition="{extensionSettings.showVariablePHP}"><input type="text" readonly value="\\TYPO3\\CMS\\Extbase\\Utility\\LocalizationUtility::translate(\'LLL:EXT:{extension}/Resources/Private/Language/{currentFileName}:{idName}\',\'\');"/></f:if><f:if condition="{extensionSettings.showVariableTypoScript}"><input type="text" readonly value=".data = LLL:EXT:{extension}/Resources/Private/Language/{currentFileName}:{idName}"/></f:if></div><span class="btn btn-default to-close"><f:render section="icon" arguments="{title:'close',T3iconPath:'actions/actions-document-close.svg',typo3SitePath:'{typo3SitePath}'}"/></span></div><div class="input-group"><a class="js-deletekey btn btn-default input-group-addon input-group-icon"><f:render section="icon" arguments="{title:'delete translation variable',T3iconPath:'actions/actions-edit-delete.svg',typo3SitePath:'{typo3SitePath}'}"/></a><input type="text" class="keyid t3-form-suggest form-control" disabled value="{idName}"/><span class="btn btn-default input-group-addon input-group-icon"><f:render section="icon" arguments="{T3iconPath:'actions/actions-document-view.svg',typo3SitePath:'{typo3SitePath}'}"/></span></div><input type="hidden" name="xliff[{fileName}__{lang}__{idName}]" value="{idName}"/></span></f:section>
 
 <f:comment><!--Render icon with wrap--></f:comment>
 <f:section name="icon"><span class="icon icon-size-small"{f:if(condition:'{title}',then:' title="{title}"')}><span class="icon-markup"><f:if condition="{T3iconPath}"><f:then><img src="{typo3SitePath}typo3/sysext/core/Resources/Public/Icons/T3Icons/{T3iconPath}" width="16" height="16"></f:then><f:else><img{f:if(condition:'{flag}',then:' data-lang="{flag}"')} src="{iconFullPath}" width="16" height="16"></f:else></f:if></span></span></f:section>

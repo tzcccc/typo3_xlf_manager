@@ -8,6 +8,31 @@
         var fileName = $('div.file').attr('data-filename');
         var $content = $('.content');
 
+        function initShowVariablesEvents(){
+            var $showVariables = $('.show-variables:not(.initialized)');
+            $showVariables.on('click',function(event) {
+                if(!$showVariables.filter('.focused').length){
+                    $(this).addClass('focused');
+                }
+            } );
+            $showVariables.find('.to-close').on('click',function(){$showVariables.filter('.focused').removeClass('focused');return false;});
+            $showVariables.find('input').each(function(i,e){
+                var $input = $(e);
+                var val = $input.val();
+                var isNew = $input.closest('.row.id.new').length;
+                if(!isNew){
+                    val = val.replace(/\\'/g, "'");
+                    val = val.replace(/\\/g, '#');
+                    val = val.replace(/##/g, '\\');
+                    $input.val(val);
+                }
+                $input.on('focus',function() {
+                    $input.select();document.execCommand("copy");
+                });
+            });
+            $showVariables.addClass('.initialized');
+        }
+
         //sanitize id
         $addKey.on('keyup',function(){
             var val = $addKey.val();
@@ -28,21 +53,28 @@
                     var lang = item.attr('data-lang');
                     var htmlToInsert = '';
                     if(index == 0){
-                        var $id = $('<span class="row id new"></span>');
-                        $id.append(window.variableMasterHTML);
-                        $id.find('.keyid').val(idName);
-                        $id.find('input[type="hidden"]').attr('name','xliff['+fileName+'__'+window.defaultLanguage+'__'+idName+']').val(idName);
-                        $id.find('textarea').val('<f:translate key="LLL:EXT:cccc_language_files/Resources/Private/Language/locallang.xlf:'+idName+'">\n{f:translate(key:\'LLL:EXT:cccc_language_files/Resources/Private/Language/locallang.xlf:'+idName+'\')}\n\\TYPO3\\CMS\\Extbase\\Utility\\LocalizationUtility::translate(\'LLL:EXT:cccc_language_files/Resources/Private/Language/locallang.xlf:'+idName+'\',\'\')');
+                        var $new = $(window.variableMasterHTML);
+                        $new.addClass('new');
+                        $new.find('.keyid').val(idName);
+                        $new.find('input[type="hidden"]').attr('name','xliff['+fileName+'__'+window.defaultLanguage+'__'+idName+']').val(idName);
+                        $new.find('.show-variables .inner input').each(function(i,e){
+                            var $input = $(e);
+                            var val = $input.val();
+                            $input.val(val.replace(window.variableKeyPath,window.variableKeyPath+idName));
+                        });
+                        //$id.find('textarea').val('<f:translate key="'+window.variableKeyPath+idName+'">\n{f:translate(key:\''+window.variableKeyPath+idName+'\')}\n\\TYPO3\\CMS\\Extbase\\Utility\\LocalizationUtility::translate(\''+window.variableKeyPath+idName+'\',\'\')');
                         if(lastTd.length){
-                            lastTd.after($id);
+                            lastTd.after($new);
                         } else {
-                            item.append($id);
+                            item.append($new);
                         }
-                        addDeleteClick($id.find('a.js-deletekey'));
+                        addDeleteClick($new.find('a.js-deletekey'));
+                        initShowVariablesEvents();
 
                     } else if(lang) {
                         var $id = $('<span class="row new '+lang+'"></span>');
                         $id.append(window.inputMasterHTML);
+                        console.log($id);
                         var $langInput = $id.find('input.lang');
                         $langInput.attr('name','xliff['+fileName+'__'+lang+'__'+idName+']').attr('tabindex',(lastTd.prevAll().length+2)+''+index);
                         if(window.defaultLanguage == lang){
@@ -143,13 +175,8 @@
             }
         });
 
-        var $showVariables = $('.show-variables');
-        $showVariables.on('click',function(event) {
-            if(!$showVariables.filter('.focused').length){
-                $(this).addClass('focused');
-            }
-        } );
-        $showVariables.find('.to-close').on('click',function(){$showVariables.filter('.focused').removeClass('focused');return false;});
-        $showVariables.find('input').on('focus',function() { $(this).select();document.execCommand("copy"); } );
+
+        initShowVariablesEvents();
+
     });
 })(jQuery);
