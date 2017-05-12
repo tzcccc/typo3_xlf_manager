@@ -109,6 +109,7 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 		$this->view->assign('variablesToShowCount',$variablesToShowCount);
 		$this->view->assign('pixelToSubtract',$variablesFocusPixelsToSubtract);
 		$this->view->assign('defaultLanguage',$this->defaultLanguage);
+		$this->view->assign('typo3SitePath',\TYPO3\CMS\Core\Utility\GeneralUtility::getIndpEnv('TYPO3_SITE_PATH'));
 	}
 
     /**

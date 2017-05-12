@@ -71,7 +71,7 @@
 				display: none
 			}
 			.cat-navi a {
-				background-image: url(/typo3/sysext/core/Resources/Public/Icons/T3Icons/mimetypes/mimetypes-x-sys_category.svg);
+				background-image: url(../../../../../../typo3/sysext/core/Resources/Public/Icons/T3Icons/mimetypes/mimetypes-x-sys_category.svg);
 				background-size: 14px;
 				background-repeat: no-repeat;
 				background-position: 4px center;
@@ -105,6 +105,7 @@
 }
 
 .btn-group {
+	white-space: nowrap;
 	&.addKeyWrap {
 		> * {
 			display: inline-block;

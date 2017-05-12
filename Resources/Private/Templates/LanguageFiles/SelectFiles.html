@@ -10,7 +10,7 @@
                     <f:link.action class="btn btn-default" action="index">
 						<span class="t3js-icon icon icon-size-small icon-state-default icon-actions-document-close" data-identifier="actions-document-close">
 							<span class="icon-markup">
-								<img src="/typo3/sysext/core/Resources/Public/Icons/T3Icons/actions/actions-document-close.svg" width="16" height="16">
+								<img src="{typo3SitePath}typo3/sysext/core/Resources/Public/Icons/T3Icons/actions/actions-document-close.svg" width="16" height="16">
 							</span>
 						</span>
                     </f:link.action>
@@ -19,7 +19,7 @@
                     <button type="submit" class="btn btn-default">
 						<span class="t3js-icon icon icon-size-small icon-state-default icon-actions-document-save" data-identifier="actions-document-save">
 							<span class="icon-markup">
-								<img src="/typo3/sysext/core/Resources/Public/Icons/T3Icons/actions/actions-document-save.svg" width="16" height="16">
+								<img src="{typo3SitePath}typo3/sysext/core/Resources/Public/Icons/T3Icons/actions/actions-document-save.svg" width="16" height="16">
 							</span>
 						</span>
                     </button>
@@ -39,11 +39,11 @@
 										<span class="input-group-addon input-group-icon">
 										<span><span class="t3js-icon icon icon-size-small icon-state-default icon-default-not-found" data-identifier="default-not-found">
 											<span class="icon-markup">
-												<img src="/typo3/sysext/core/Resources/Public/Icons/T3Icons/actions/actions-page-new.svg" width="16" height="16">
+												<img src="{typo3SitePath}typo3/sysext/core/Resources/Public/Icons/T3Icons/actions/actions-page-new.svg" width="16" height="16">
 											</span>
 										</span></span>
 										</span>
-									<input class="form-control cccc-file t3js-clearable hasDefaultValue" name="tx_cccclanguagefiles_tools_cccclanguagefileslanguagefiles[extensions][{e.ext}][cccc]" id="ext_{e.ext}" type="text" value="" pattern="[a-z]*" placeholder="create custom language file locallang_[your_name].xlf" />
+									<input class="form-control cccc-file t3js-clearable hasDefaultValue" name="tx_typo3xlfmanager_tools_typo3xlfmanagertypo3xlfmanager[extensions][{e.ext}][cccc]" id="ext_{e.ext}" type="text" value="" pattern="[a-z]*" placeholder="create custom language file locallang_[your_name].xlf" />
 								</div>
 							</li>
 							<f:if condition="{e.files}">
@@ -53,7 +53,7 @@
 											<span class="input-group-addon input-group-icon input-inside">
 											<span><span class="t3js-icon icon icon-size-small icon-state-default icon-default-not-found" data-identifier="default-not-found">
 												<span class="icon-markup">
-													<input id="{e.ext}_file_{f.filename}" name="tx_cccclanguagefiles_tools_cccclanguagefileslanguagefiles[extensions][{e.ext}][files][]" type="checkbox" value="{f.filename}" {f:if(condition:'{f.checked}',then:'checked="checked" class="checked"')} />
+													<input id="{e.ext}_file_{f.filename}" name="tx_typo3xlfmanager_tools_typo3xlfmanagertypo3xlfmanager[extensions][{e.ext}][files][]" type="checkbox" value="{f.filename}" {f:if(condition:'{f.checked}',then:'checked="checked" class="checked"')} />
 													<span class="check-status"></span>
 												</span>
 											</span></span>

@@ -65,7 +65,7 @@
   display: none;
 }
 .module-docheader.actions .navigation-wrap .cat-navi a {
-  background-image: url(/typo3/sysext/core/Resources/Public/Icons/T3Icons/mimetypes/mimetypes-x-sys_category.svg);
+  background-image: url(../../../../../../typo3/sysext/core/Resources/Public/Icons/T3Icons/mimetypes/mimetypes-x-sys_category.svg);
   background-size: 14px;
   background-repeat: no-repeat;
   background-position: 4px center;
@@ -92,6 +92,9 @@
   display: block;
 }
 
+.btn-group {
+  white-space: nowrap;
+}
 .btn-group.addKeyWrap > * {
   display: inline-block;
   vertical-align: bottom;

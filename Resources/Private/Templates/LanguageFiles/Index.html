@@ -30,14 +30,14 @@
 					<div class="module-docheader-bar-column-left">
 						<div class="btn-group" role="group">
 							<button type="submit" class="btn btn-default">
-								<f:render section="icon" arguments="{title:'save language file',T3iconPath:'actions/actions-document-save.svg'}" />
+								<f:render section="icon" arguments="{title:'save language file',T3iconPath:'actions/actions-document-save.svg',typo3SitePath:'{typo3SitePath}'}" />
 							</button>
 						</div>
 						<div class="addKeyWrap btn-group" role="group">
 							<div class="t3js-formengine-field-item">
 								<div class="input-group">
 									<span class="input-group-addon input-group-icon">
-										<f:render section="icon" arguments="{T3iconPath:'mimetypes/mimetypes-x-sys_category.svg'}" />
+										<f:render section="icon" arguments="{T3iconPath:'mimetypes/mimetypes-x-sys_category.svg',typo3SitePath:'{typo3SitePath}'}" />
 									</span>
 									<select id="catKey" class="form-control form-control-adapt">
 										<option value=""></option>
@@ -46,7 +46,7 @@
 							</div>
 							<input type="text" id="addKey" value="" class="form-control t3js-clearable hasDefaultValue">
 							<button id="addId" class="btn btn-default default">
-								<f:render section="icon" arguments="{title:'add translation variable',T3iconPath:'actions/actions-document-new.svg'}" />
+								<f:render section="icon" arguments="{title:'add translation variable',T3iconPath:'actions/actions-document-new.svg',typo3SitePath:'{typo3SitePath}'}" />
 							</button>
 						</div>
 					</div>
@@ -58,10 +58,10 @@
 								<span class="btn btn-default language-icon">
 									<f:if condition="{flag} != 'en'">
 										<f:then>
-											<f:render section="icon" arguments="{title:'Scroll to {f:format.case(mode:\'upper\',value:\'{flag}\')}',iconFullPath:'/typo3/sysext/core/Resources/Public/Icons/Flags/SVG/{f:format.case(mode:\'upper\',value:\'{flag}\')}.svg',flag:'{flag}'}" />
+											<f:render section="icon" arguments="{title:'Scroll to {f:format.case(mode:\'upper\',value:\'{flag}\')}',iconFullPath:'{typo3SitePath}typo3/sysext/core/Resources/Public/Icons/Flags/SVG/{f:format.case(mode:\'upper\',value:\'{flag}\')}.svg',flag:'{flag}'}" />
 										</f:then>
 										<f:else>
-											<f:render section="icon" arguments="{title:'Scroll to EN',iconFullPath:'/typo3/sysext/core/Resources/Public/Icons/Flags/SVG/GB.svg',flag:'en'}" />
+											<f:render section="icon" arguments="{title:'Scroll to EN',iconFullPath:'{typo3SitePath}typo3/sysext/core/Resources/Public/Icons/Flags/SVG/GB.svg',flag:'en'}" />
 										</f:else>
 									</f:if>
 								</span>
@@ -71,44 +71,49 @@
 					<div class="btn-group" role="group">
 						<f:if condition="{filesAssigned}">
 							<f:link.action class="btn btn-default default" action="selectCurrentFile">
-								<f:render section="icon" arguments="{T3iconPath:'actions/actions-system-extension-configure.svg'}" />
+								<f:render section="icon" arguments="{T3iconPath:'actions/actions-system-extension-configure.svg',typo3SitePath:'{typo3SitePath}'}" />
 								select translation file
 							</f:link.action>
 						</f:if>
 						<f:link.action class="btn btn-default default" action="selectFiles">
-							<f:render section="icon" arguments="{T3iconPath:'actions/actions-filter.svg'}" />
+							<f:render section="icon" arguments="{T3iconPath:'actions/actions-filter.svg',typo3SitePath:'{typo3SitePath}'}" />
 							assign XLIFF files
 						</f:link.action>
 						<f:if condition="{extensionSettings.autoClearLangCacheBySave}">
 							<f:else>
 								<f:link.action class="btn btn-default default" action="clearLanguageCache">
-									<f:render section="icon" arguments="{title:'clear language cache',T3iconPath:'actions/actions-system-cache-clear.svg'}" />
+									<f:render section="icon" arguments="{title:'clear language cache',T3iconPath:'actions/actions-system-cache-clear.svg',typo3SitePath:'{typo3SitePath}'}" />
 								</f:link.action>
 							</f:else>
 						</f:if>
 					</div>
 				</div>
-				<div class="navigation-wrap">
-					<div class="btn-group" role="group">
-						<a id="toggleSubcats" class="btn btn-default">
-							<f:render section="icon" arguments="{T3iconPath:'actions/actions-swap.svg'}" />
-							show subcategories
-						</a>
+				<f:if condition="{filesAssigned}">
+					<f:if condition="{data}">
+					<div class="navigation-wrap">
+						<div class="btn-group" role="group">
+							<a id="toggleSubcats" class="btn btn-default">
+								<f:render section="icon" arguments="{T3iconPath:'actions/actions-swap.svg',typo3SitePath:'{typo3SitePath}'}" />
+								show subcategories
+							</a>
+						</div>
+
+						<f:for each="{data}" as="file" key="fileName" iteration="dataiter">
+							<nav class="cat-navi">
+								<ul><li class="blank"><ul><li>
+								<f:for each="{file.en}" as="id" key="idName">
+									<f:if condition="{id.cat}">
+									</li></ul><li class="cat"><a href="#cat{id.cat}">{id.cat}</a><ul>
+								</f:if>
+								<f:if condition="{id.subcat}">
+									<li class="subcat"><a href="#subcat{id.subcatAsId}"><f:format.html parseFuncTSPath="">{id.subcat}</f:format.html></a></li>
+								</f:if>
+								</f:for>
+							</ul></nav>
+						</f:for>
 					</div>
-					<f:for each="{data}" as="file" key="fileName" iteration="dataiter">
-						<nav class="cat-navi">
-							<ul><li class="blank"><ul><li>
-							<f:for each="{file.en}" as="id" key="idName">
-								<f:if condition="{id.cat}">
-								</li></ul><li class="cat"><a href="#cat{id.cat}">{id.cat}</a><ul>
-							</f:if>
-							<f:if condition="{id.subcat}">
-								<li class="subcat"><a href="#subcat{id.subcatAsId}"><f:format.html parseFuncTSPath="">{id.subcat}</f:format.html></a></li>
-							</f:if>
-							</f:for>
-						</ul></nav>
-					</f:for>
-				</div>
+					</f:if>
+				</f:if>
             </div>
 
 			<f:if condition="{data}">
@@ -145,16 +150,16 @@
 														</f:if>
 													</div>
 													<span class="btn btn-default to-close">
-														<f:render section="icon" arguments="{title:'close',T3iconPath:'actions/actions-document-close.svg'}" />
+														<f:render section="icon" arguments="{title:'close',T3iconPath:'actions/actions-document-close.svg',typo3SitePath:'{typo3SitePath}'}" />
 													</span>
 												</div>
 												<div class="input-group">
 													<a class="js-deletekey btn btn-default input-group-addon input-group-icon">
-														<f:render section="icon" arguments="{title:'delete translation variable',T3iconPath:'actions/actions-edit-delete.svg'}" />
+														<f:render section="icon" arguments="{title:'delete translation variable',T3iconPath:'actions/actions-edit-delete.svg',typo3SitePath:'{typo3SitePath}'}" />
 													</a>
 													<input type="text" class="keyid t3-form-suggest form-control" disabled value="{idName}" />
 													<span class="btn btn-default input-group-addon input-group-icon">
-														<f:render section="icon" arguments="{T3iconPath:'actions/actions-document-view.svg'}" />
+														<f:render section="icon" arguments="{T3iconPath:'actions/actions-document-view.svg',typo3SitePath:'{typo3SitePath}'}" />
 													</span>
 												</div>
 												<input type="hidden" name="xliff[{fileName}__{lang}__{idName}]" value="{idName}" />
@@ -175,10 +180,10 @@
 												<span class="input-group-addon">
 													<f:if condition="{lang} != 'en'">
 														<f:then>
-															<f:render section="icon" arguments="{iconFullPath:'/typo3/sysext/core/Resources/Public/Icons/Flags/SVG/{f:format.case(mode:\'upper\',value:\'{lang}\')}.svg'}" />
+															<f:render section="icon" arguments="{iconFullPath:'{typo3SitePath}typo3/sysext/core/Resources/Public/Icons/Flags/SVG/{f:format.case(mode:\'upper\',value:\'{lang}\')}.svg'}" />
 														</f:then>
 														<f:else>
-															<f:render section="icon" arguments="{iconFullPath:'/typo3/sysext/core/Resources/Public/Icons/Flags/SVG/GB.svg'}" />
+															<f:render section="icon" arguments="{iconFullPath:'{typo3SitePath}typo3/sysext/core/Resources/Public/Icons/Flags/SVG/GB.svg'}" />
 														</f:else>
 													</f:if>
 												</span>
@@ -192,7 +197,7 @@
 												</f:if>
 												<span class="after">{idName}</span>
 												<span class="btn btn-default to-close">
-													<f:render section="icon" arguments="{title:'close',T3iconPath:'actions/actions-document-close.svg'}" />
+													<f:render section="icon" arguments="{title:'close',T3iconPath:'actions/actions-document-close.svg',typo3SitePath:'{typo3SitePath}'}" />
 												</span>
 											</div>
 										</span>
@@ -210,11 +215,11 @@
 	</f:form>
 
 	<script>
-		window.variableMasterHTML = '<textarea title="show translation variable" readonly="readonly" tabindex="-1"></textarea><div class="input-group"><a class="js-deletekey btn btn-default input-group-addon input-group-icon"><f:render section="icon" arguments="{title:'delete translation variable',T3iconPath:'actions/actions-edit-delete.svg'}" /></a><input type="text" class="keyid t3-form-suggest form-control" disabled /><span class="btn btn-default input-group-addon input-group-icon"><f:render section="icon" arguments="{T3iconPath:'actions/actions-document-view.svg'}" /></span></div><input type="hidden" name="" value="" />';
-		window.inputMasterHTML = '<div class="input-group"><span class="input-group-addon"><f:render section="icon" arguments="{iconFullPath:'/typo3/sysext/core/Resources/Public/Icons/Flags/SVG/'}" /> </span><input class="lang t3-form-suggest form-control" type="text" name="" value="" tabindex=""><span class="after"></span><span class="btn btn-default to-close"><f:render section="icon" arguments="{title:'close',T3iconPath:'actions/actions-document-close.svg'}" /></span></div>';
+		window.variableMasterHTML = '<textarea title="show translation variable" readonly="readonly" tabindex="-1"></textarea><div class="input-group"><a class="js-deletekey btn btn-default input-group-addon input-group-icon"><f:render section="icon" arguments="{title:'delete translation variable',T3iconPath:'actions/actions-edit-delete.svg',typo3SitePath:'{typo3SitePath}'}" /></a><input type="text" class="keyid t3-form-suggest form-control" disabled /><span class="btn btn-default input-group-addon input-group-icon"><f:render section="icon" arguments="{T3iconPath:'actions/actions-document-view.svg',typo3SitePath:'{typo3SitePath}'}" /></span></div><input type="hidden" name="" value="" />';
+		window.inputMasterHTML = '<div class="input-group"><span class="input-group-addon"><f:render section="icon" arguments="{iconFullPath:'{typo3SitePath}typo3/sysext/core/Resources/Public/Icons/Flags/SVG/'}" /> </span><input class="lang t3-form-suggest form-control" type="text" name="" value="" tabindex=""><span class="after"></span><span class="btn btn-default to-close"><f:render section="icon" arguments="{title:'close',T3iconPath:'actions/actions-document-close.svg',typo3SitePath:'{typo3SitePath}'}" /></span></div>';
 	</script>
 
 </f:section>
 
 <f:comment><!--Render icon with wrap--></f:comment>
-<f:section name="icon"><span class="icon icon-size-small"{f:if(condition:'{title}',then:' title="{title}"')}><span class="icon-markup"><f:if condition="{T3iconPath}"><f:then><img src="/typo3/sysext/core/Resources/Public/Icons/T3Icons/{T3iconPath}" width="16" height="16"></f:then><f:else><img{f:if(condition:'{flag}',then:' data-lang="{flag}"')} src="{iconFullPath}" width="16" height="16"></f:else></f:if></span></span></f:section>
+<f:section name="icon"><span class="icon icon-size-small"{f:if(condition:'{title}',then:' title="{title}"')}><span class="icon-markup"><f:if condition="{T3iconPath}"><f:then><img src="{typo3SitePath}typo3/sysext/core/Resources/Public/Icons/T3Icons/{T3iconPath}" width="16" height="16"></f:then><f:else><img{f:if(condition:'{flag}',then:' data-lang="{flag}"')} src="{iconFullPath}" width="16" height="16"></f:else></f:if></span></span></f:section>
