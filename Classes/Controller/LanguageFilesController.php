@@ -541,5 +541,36 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 		}
 	}
 
+	/**
+	 * Creates a Message object and adds it to the FlashMessageQueue.
+	 *
+	 * @param string $messageBody The message
+	 * @param string $messageTitle Optional message title
+	 * @param int $severity Optional severity, must be one of \TYPO3\CMS\Core\Messaging\FlashMessage constants
+	 * @param bool $storeInSession Optional, defines whether the message should be stored in the session (default) or not
+	 * @throws \InvalidArgumentException if the message body is no string
+	 * @see \TYPO3\CMS\Core\Messaging\FlashMessage
+	 * @api
+	 */
+	public function addFlashMessage($messageBody, $messageTitle = '', $severity = \TYPO3\CMS\Core\Messaging\AbstractMessage::OK, $storeInSession = true)
+	{
+		if (!is_string($messageBody)) {
+			throw new \InvalidArgumentException('The message body must be of type string, "' . gettype($messageBody) . '" given.', 1243258395);
+		}
+
+		//remove HTML-tags temporarily until flash message rendering supports them
+		$messageBody = strip_tags(str_replace('<br>',' ',$messageBody));
+
+		/* @var \TYPO3\CMS\Core\Messaging\FlashMessage $flashMessage */
+		$flashMessage = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+			\TYPO3\CMS\Core\Messaging\FlashMessage::class,
+			(string)$messageBody,
+			(string)$messageTitle,
+			$severity,
+			$storeInSession
+		);
+		$this->controllerContext->getFlashMessageQueue()->enqueue($flashMessage);
+	}
+
 }
 ?>
