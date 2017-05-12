@@ -51,6 +51,7 @@
                     var item = $(e);
                     var lastTd = item.find('span.row').last();
                     var lang = item.attr('data-lang');
+                    var flag = item.attr('data-flag');
                     var htmlToInsert = '';
                     if(index == 0){
                         var $new = $(window.variableMasterHTML);
@@ -74,7 +75,6 @@
                     } else if(lang) {
                         var $id = $('<span class="row new '+lang+'"></span>');
                         $id.append(window.inputMasterHTML);
-                        console.log($id);
                         var $langInput = $id.find('input.lang');
                         $langInput.attr('name','xliff['+fileName+'__'+lang+'__'+idName+']').attr('tabindex',(lastTd.prevAll().length+2)+''+index);
                         if(window.defaultLanguage == lang){
@@ -82,7 +82,7 @@
                         }
                         $id.find('span.after').text(idName);
                         var $img = $id.find('img').first();
-                        var icon = lang.toUpperCase();
+                        var icon = flag.toUpperCase();
                         if(lang == 'en'){
                             icon = 'GB';
                         }
@@ -102,7 +102,6 @@
                     }
 
                     $addKey.val('');;
-                    //console.log(item,index);
                 });
             } else {
                 alert('Please specify the translate key ID.');

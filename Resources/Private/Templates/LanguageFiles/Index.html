@@ -137,8 +137,11 @@
 										</f:for>
 									</div>
 								</f:if>
-								<div class="col" data-lang="{lang}">
+
 									<f:for each="{langFile}" as="id" key="idName" iteration="idIter">
+										<f:if condition="{idIter.isFirst}">
+											<div class="col" data-lang="{lang}" data-flag="{id.flag}">
+										</f:if>
 										<f:if condition="{id.subcat}">
 											<span class="row subcat"></span>
 										</f:if>
