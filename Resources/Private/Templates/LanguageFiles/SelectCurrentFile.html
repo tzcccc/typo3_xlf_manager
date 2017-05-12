@@ -1,0 +1,61 @@
+<f:layout name="Default" />
+
+<f:section name="main">
+
+    <f:form id="form" name="aha" action="selectCurrentFile" method="post">
+
+        <div class="actions module-docheader">
+            <div class="module-docheader-bar-column-left">
+                <div class="btn-group" role="group">
+                    <f:link.action class="btn btn-default" action="index">
+						<span class="t3js-icon icon icon-size-small icon-state-default icon-actions-document-close" data-identifier="actions-document-close">
+							<span class="icon-markup">
+								<img src="/typo3/sysext/core/Resources/Public/Icons/T3Icons/actions/actions-document-close.svg" width="16" height="16">
+							</span>
+						</span>
+                    </f:link.action>
+                </div>
+                <div class="btn-group" role="group">
+                    <button type="submit" class="btn btn-default">
+						<span class="t3js-icon icon icon-size-small icon-state-default icon-actions-document-save" data-identifier="actions-document-save">
+							<span class="icon-markup">
+								<img src="/typo3/sysext/core/Resources/Public/Icons/T3Icons/actions/actions-document-save.svg" width="16" height="16">
+							</span>
+						</span>
+                    </button>
+                </div>
+                <h3>Select current file to translate</h3>
+            </div>
+        </div>
+
+		<div class="extensions-fieldsets">
+			<f:for each="{data}" as="options" key="extension" iteration="optiter">
+				<fieldset class="form-section extension">
+					<legend class="extension">{extension}</legend>
+					<f:if condition="{options}">
+						<ul>
+							<f:for each="{options}" as="f" iteration="fileiter">
+								<li class="file">
+									<div class="input-group">
+										<span class="input-group-addon input-group-icon input-inside">
+										<span><span class="t3js-icon icon icon-size-small icon-state-default icon-default-not-found" data-identifier="default-not-found">
+											<span class="icon-markup">
+												<input id="{e.ext}_file_{f.filename}" name="tx_cccclanguagefiles_tools_cccclanguagefileslanguagefiles[currentFile]" type="radio" value="{f.fullPath}" {f:if(condition:'{f.checked}',then:'checked="checked" class="checked"')} />
+												<span class="check-status"></span>
+											</span>
+										</span></span>
+										</span>
+										<label for="{e.ext}_file_{f.filename}"></label>
+										<input type="text" readonly value="{f.filename}" class="form-control t3js-clearable hasDefaultValue">
+									</div>
+								</li>
+							</f:for>
+						</ul>
+					</f:if>
+				</fieldset>
+			</f:for>
+		</div>
+
+    </f:form>
+
+</f:section>

@@ -1,0 +1,12 @@
+# cat=general; type=string; label=Default language:Set up default webpage language (en, de, fr, ...)
+defaultLanguage = en
+# cat=general; type=boolean; label=Automatically clear language cache (typo3temp/Cache/Data/l10n/) by saving language file : if unchecked -> clear button enabled
+autoClearLangCacheBySave = 1
+# cat=variables; type=boolean; label=Show fluid standard : <f:translate key="LLL:EXT:cccc_language_files/Resources/Private/Language/locallang.xlf:your.key" />
+showVariableFluidStandard = 1
+# cat=variables; type=boolean; label=Show fluid inline : {f:translate(key:'LLL:EXT:cccc_language_files/Resources/Private/Language/locallang.xlf:your.key')}
+showVariableFluidInline = 1
+# cat=variables; type=boolean; label=Show PHP : \TYPO3\CMS\Extbase\Utility\LocalizationUtility::translate('LLL:EXT:cccc_language_files/Resources/Private/Language/locallang.xlf:your.key','')
+showVariablePHP = 0
+# cat=variables; type=boolean; label=Show TypoScript : .data = LLL:EXT:cccc_language_files/Resources/Private/Language/locallang.xlf:your.key
+showVariableTypoScript = 0

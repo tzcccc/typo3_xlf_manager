@@ -1,0 +1,220 @@
+{namespace v=FluidTYPO3\Vhs\ViewHelpers}
+<f:layout name="Default" />
+
+<f:section name="main">
+
+    <h2>
+        <f:if condition="{filesAssigned}">
+            <f:then>
+                <f:if condition="{data}">
+					<f:then>
+						<span class="ext">{extension}</span> | {currentFileName}
+					</f:then>
+					<f:else>
+						<strong>2. select translation file to work with</strong>
+					</f:else>
+				</f:if>
+            </f:then>
+            <f:else>
+                <strong>1. assign extensions language files first</strong>
+            </f:else>
+        </f:if>
+
+    </h2>
+
+
+	<f:form id="form" action="update" method="post">
+
+            <div class="actions module-docheader">
+				<f:if condition="{data}">
+					<div class="module-docheader-bar-column-left">
+						<div class="btn-group" role="group">
+							<button type="submit" class="btn btn-default">
+								<f:render section="icon" arguments="{title:'save language file',T3iconPath:'actions/actions-document-save.svg'}" />
+							</button>
+						</div>
+						<div class="addKeyWrap btn-group" role="group">
+							<div class="t3js-formengine-field-item">
+								<div class="input-group">
+									<span class="input-group-addon input-group-icon">
+										<f:render section="icon" arguments="{T3iconPath:'mimetypes/mimetypes-x-sys_category.svg'}" />
+									</span>
+									<select id="catKey" class="form-control form-control-adapt">
+										<option value=""></option>
+									</select>
+								</div>
+							</div>
+							<input type="text" id="addKey" value="" class="form-control t3js-clearable hasDefaultValue">
+							<button id="addId" class="btn btn-default default">
+								<f:render section="icon" arguments="{title:'add translation variable',T3iconPath:'actions/actions-document-new.svg'}" />
+							</button>
+						</div>
+					</div>
+				</f:if>
+				<div class="module-docheader-bar-column-right">
+					<f:if condition="{data}">
+						<div class="btn-group" role="group">
+							<f:for each="{languages}" as="lang" key="flag">
+								<span class="btn btn-default language-icon">
+									<f:if condition="{flag} != 'en'">
+										<f:then>
+											<f:render section="icon" arguments="{title:'Scroll to {f:format.case(mode:\'upper\',value:\'{flag}\')}',iconFullPath:'/typo3/sysext/core/Resources/Public/Icons/Flags/SVG/{f:format.case(mode:\'upper\',value:\'{flag}\')}.svg',flag:'{flag}'}" />
+										</f:then>
+										<f:else>
+											<f:render section="icon" arguments="{title:'Scroll to EN',iconFullPath:'/typo3/sysext/core/Resources/Public/Icons/Flags/SVG/GB.svg',flag:'en'}" />
+										</f:else>
+									</f:if>
+								</span>
+							</f:for>
+						</div>
+					</f:if>
+					<div class="btn-group" role="group">
+						<f:if condition="{filesAssigned}">
+							<f:link.action class="btn btn-default default" action="selectCurrentFile">
+								<f:render section="icon" arguments="{T3iconPath:'actions/actions-system-extension-configure.svg'}" />
+								select translation file
+							</f:link.action>
+						</f:if>
+						<f:link.action class="btn btn-default default" action="selectFiles">
+							<f:render section="icon" arguments="{T3iconPath:'actions/actions-filter.svg'}" />
+							assign XLIFF files
+						</f:link.action>
+						<f:if condition="{extensionSettings.autoClearLangCacheBySave}">
+							<f:else>
+								<f:link.action class="btn btn-default default" action="clearLanguageCache">
+									<f:render section="icon" arguments="{title:'clear language cache',T3iconPath:'actions/actions-system-cache-clear.svg'}" />
+								</f:link.action>
+							</f:else>
+						</f:if>
+					</div>
+				</div>
+				<div class="navigation-wrap">
+					<div class="btn-group" role="group">
+						<a id="toggleSubcats" class="btn btn-default">
+							<f:render section="icon" arguments="{T3iconPath:'actions/actions-swap.svg'}" />
+							show subcategories
+						</a>
+					</div>
+					<f:for each="{data}" as="file" key="fileName" iteration="dataiter">
+						<nav class="cat-navi">
+							<ul><li class="blank"><ul><li>
+							<f:for each="{file.en}" as="id" key="idName">
+								<f:if condition="{id.cat}">
+								</li></ul><li class="cat"><a href="#cat{id.cat}">{id.cat}</a><ul>
+							</f:if>
+							<f:if condition="{id.subcat}">
+								<li class="subcat"><a href="#subcat{id.subcatAsId}"><f:format.html parseFuncTSPath="">{id.subcat}</f:format.html></a></li>
+							</f:if>
+							</f:for>
+						</ul></nav>
+					</f:for>
+				</div>
+            </div>
+
+			<f:if condition="{data}">
+
+            <div class="language-file-wrap">
+
+                <f:for each="{data}" as="file" key="fileName" iteration="dataiter">
+                    <div class="file" data-filename="{fileName}">
+						<div class="content">
+							<f:for each="{file}" as="langFile" key="lang" iteration="langIter">
+								<f:if condition="{lang} == {defaultLanguage}">
+									<div class="col ids">
+										<f:for each="{langFile}" as="id" key="idName">
+											<f:if condition="{id.subcatAsId}">
+												<span id="subcat{id.subcatAsId}" class="row subcat"><f:format.html parseFuncTSPath="">{id.subcat}</f:format.html></span>
+											</f:if>
+											<f:if condition="{id.cat}">
+												<span id="cat{id.cat}" class="row cat">{id.cat}</span>
+											</f:if>
+											<span class="row id">
+												<div class="show-variables" tabindex="-1">
+													<div class="inner">
+														<f:if condition="{extensionSettings.showVariableFluidStandard}">
+															<input type="text" readonly value="&lt;f:translate key=&quot;LLL:EXT:cccc_language_files/Resources/Private/Language/locallang.xlf:{idName}&quot; /&gt;" />
+														</f:if>
+														<f:if condition="{extensionSettings.showVariableFluidInline}">
+															<input type="text" readonly value="&lbrace;f:translate(key:&apos;LLL:EXT:cccc_language_files/Resources/Private/Language/locallang.xlf:{idName}&apos;)&rbrace;" />
+														</f:if>
+														<f:if condition="{extensionSettings.showVariablePHP}">
+															<input type="text" readonly value="\TYPO3\CMS\Extbase\Utility\LocalizationUtility::translate('LLL:EXT:cccc_language_files/Resources/Private/Language/locallang.xlf:{idName}','')" />
+														</f:if>
+														<f:if condition="{extensionSettings.showVariableTypoScript}">
+															<input type="text" readonly value=".data = LLL:EXT:cccc_language_files/Resources/Private/Language/locallang.xlf:{idName}" />
+														</f:if>
+													</div>
+													<span class="btn btn-default to-close">
+														<f:render section="icon" arguments="{title:'close',T3iconPath:'actions/actions-document-close.svg'}" />
+													</span>
+												</div>
+												<div class="input-group">
+													<a class="js-deletekey btn btn-default input-group-addon input-group-icon">
+														<f:render section="icon" arguments="{title:'delete translation variable',T3iconPath:'actions/actions-edit-delete.svg'}" />
+													</a>
+													<input type="text" class="keyid t3-form-suggest form-control" disabled value="{idName}" />
+													<span class="btn btn-default input-group-addon input-group-icon">
+														<f:render section="icon" arguments="{T3iconPath:'actions/actions-document-view.svg'}" />
+													</span>
+												</div>
+												<input type="hidden" name="xliff[{fileName}__{lang}__{idName}]" value="{idName}" />
+											</span>
+										</f:for>
+									</div>
+								</f:if>
+								<div class="col" data-lang="{lang}">
+									<f:for each="{langFile}" as="id" key="idName" iteration="idIter">
+										<f:if condition="{id.subcat}">
+											<span class="row subcat"></span>
+										</f:if>
+										<f:if condition="{id.cat}">
+											<span class="row cat"></span>
+										</f:if>
+										<span class="row {lang}">
+											<div class="input-group">
+												<span class="input-group-addon">
+													<f:if condition="{lang} != 'en'">
+														<f:then>
+															<f:render section="icon" arguments="{iconFullPath:'/typo3/sysext/core/Resources/Public/Icons/Flags/SVG/{f:format.case(mode:\'upper\',value:\'{lang}\')}.svg'}" />
+														</f:then>
+														<f:else>
+															<f:render section="icon" arguments="{iconFullPath:'/typo3/sysext/core/Resources/Public/Icons/Flags/SVG/GB.svg'}" />
+														</f:else>
+													</f:if>
+												</span>
+												<f:if condition="{lang} == {defaultLanguage}">
+													<f:then>
+														<input class="lang t3-form-suggest form-control" required type="text" name="xliff[{fileName}__{lang}__{idName}]" value="{id.source}" tabindex="{idIter.cycle}{langIter.cycle}">
+													</f:then>
+													<f:else>
+														<input class="lang t3-form-suggest form-control" type="text" name="xliff[{fileName}__{lang}__{idName}]" value="{id.target}" tabindex="{idIter.cycle}{langIter.cycle}">
+													</f:else>
+												</f:if>
+												<span class="after">{idName}</span>
+												<span class="btn btn-default to-close">
+													<f:render section="icon" arguments="{title:'close',T3iconPath:'actions/actions-document-close.svg'}" />
+												</span>
+											</div>
+										</span>
+									</f:for>
+								</div>
+							</f:for>
+						</div>
+					</div>
+            </f:for>
+
+            </div>
+
+			</f:if>
+
+	</f:form>
+
+	<script>
+		window.variableMasterHTML = '<textarea title="show translation variable" readonly="readonly" tabindex="-1"></textarea><div class="input-group"><a class="js-deletekey btn btn-default input-group-addon input-group-icon"><f:render section="icon" arguments="{title:'delete translation variable',T3iconPath:'actions/actions-edit-delete.svg'}" /></a><input type="text" class="keyid t3-form-suggest form-control" disabled /><span class="btn btn-default input-group-addon input-group-icon"><f:render section="icon" arguments="{T3iconPath:'actions/actions-document-view.svg'}" /></span></div><input type="hidden" name="" value="" />';
+		window.inputMasterHTML = '<div class="input-group"><span class="input-group-addon"><f:render section="icon" arguments="{iconFullPath:'/typo3/sysext/core/Resources/Public/Icons/Flags/SVG/'}" /> </span><input class="lang t3-form-suggest form-control" type="text" name="" value="" tabindex=""><span class="after"></span><span class="btn btn-default to-close"><f:render section="icon" arguments="{title:'close',T3iconPath:'actions/actions-document-close.svg'}" /></span></div>';
+	</script>
+
+</f:section>
+
+<f:comment><!--Render icon with wrap--></f:comment>
+<f:section name="icon"><span class="icon icon-size-small"{f:if(condition:'{title}',then:' title="{title}"')}><span class="icon-markup"><f:if condition="{T3iconPath}"><f:then><img src="/typo3/sysext/core/Resources/Public/Icons/T3Icons/{T3iconPath}" width="16" height="16"></f:then><f:else><img{f:if(condition:'{flag}',then:' data-lang="{flag}"')} src="{iconFullPath}" width="16" height="16"></f:else></f:if></span></span></f:section>
