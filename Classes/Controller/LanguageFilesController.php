@@ -30,6 +30,9 @@ namespace CCCC\Typo3XlfManager\Controller;
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  *
  */
+use \TYPO3\CMS\Core\Messaging\FlashMessage;
+use \TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+
 class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController {
 
 	const EXTKEY = 'typo3_xlf_manager';
@@ -47,8 +50,8 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 	/**
 	 * configuration files
 	 */
-	protected $selectedLanguageFilesConfigurationFile;
-	protected $currentLanguageFile;
+	protected $configurationFile;
+	protected $languageFilesConfiguration;
 
 	/**
 	 * @var array extension settings
@@ -62,14 +65,15 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 
     public function initializeAction(){
 
-    	$thisExtensionFolderPath = \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath(self::EXTKEY);
+    	$thisExtensionFolderPath = ExtensionManagementUtility::extPath(self::EXTKEY);
 
         //initialize paths for configuration files and cache folder
-		$this->configurationFolder = $thisExtensionFolderPath.'Configuration/';
-        $this->selectedLanguageFilesConfigurationFile = $this->configurationFolder.'selectedLanguageFiles.txt';
-        $this->currentLanguageFile = $this->configurationFolder.'currentLanguageFile.txt';
+		$configurationFolder = $thisExtensionFolderPath.'Configuration/';
         $extPathSplit = explode('typo3conf',$thisExtensionFolderPath);
 		$this->languageCacheFolder = $extPathSplit[0].'typo3temp/Cache/Data/l10n/';
+
+		//initialize language files configuration
+		$this->configurationFile = $configurationFolder.'languageFiles.json';
 
         //initialize system languages
         $sql = "SELECT static_lang_isocode,flag FROM sys_language WHERE hidden = 0";
@@ -92,9 +96,17 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
     }
 
     public function initializeView(\TYPO3\CMS\Extbase\Mvc\View\ViewInterface $view) {
+
+    	//check configuration file
+    	if(!is_file($this->configurationFile)){
+			$this->addFlashMessage('EXT:Configuration/languageFiles.json','Configuration JSON file missing!',FlashMessage::ERROR);
+		} else {
+			$this->languageFilesConfiguration = $this->getLanguageFilesConfiguration();
+		}
+
     	//assign css and js file for every action
-		$this->view->assign('cssFile',\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extRelPath(self::EXTKEY).'Resources/Public/css/styles.css');
-		$this->view->assign('jsFile',\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extRelPath(self::EXTKEY).'Resources/Public/js/script.js');
+		$this->view->assign('cssFile',ExtensionManagementUtility::extRelPath(self::EXTKEY).'Resources/Public/css/styles.css');
+		$this->view->assign('jsFile',ExtensionManagementUtility::extRelPath(self::EXTKEY).'Resources/Public/js/script.js');
 		$variablesToShowCount = 0;
 		foreach($this->extensionSettings as $k => $s){
 			if(substr_count($k,'showVariable') && $s){
@@ -123,25 +135,23 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 		$locales = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Localization\\Locales');
 		$localesLanguages = $locales->getLocales();
 		if($this->defaultLanguage != 'en' && !in_array('en',$localesLanguages)){
-			$this->addFlashMessage('If you want to use default language other than "English" you need to extend locales language list by "en" => "English" in TYPO3\CMS\Core\Localization\Locales::$languages to be able to use "en.locallang.xlf" files.','LOCALES ADJUSTMENT NEEDED!','ERROR');
+			$this->addFlashMessage('If you want to use default language other than "English" you need to extend locales language list by "en" => "English" in TYPO3\CMS\Core\Localization\Locales::$languages to be able to use "en.locallang.xlf" files.','LOCALES ADJUSTMENT NEEDED!',FlashMessage::ERROR);
 		}
 
 		//check if files assigned
-		$selectedLanguageFiles = $this->getSelectedFilesFromConfiguration();
-		if(!empty($selectedLanguageFiles)){
+		if(!empty($this->languageFilesConfiguration['selected'])){
 			$this->view->assign('filesAssigned',true);
 		}
 
-		$currentTranslationFile = $this->getCurrentLanguageFile();
-		if($currentTranslationFile){
+		if($this->languageFilesConfiguration['current'] && is_file($this->languageFilesConfiguration['current'])){
 
-			$fileData = $this->getExtensionAndFilenameFormPath($currentTranslationFile);
+			$fileData = $this->getExtensionAndFilenameFormPath($this->languageFilesConfiguration['current']);
 
 			$fileName = $fileData['filename'];
 
 			$DATA = array();
 
-			$xml = simplexml_load_file($currentTranslationFile);
+			$xml = simplexml_load_file($this->languageFilesConfiguration['current']);
 
 			$elements = $xml->xpath('//trans-unit');
 			if($elements){
@@ -210,9 +220,9 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 				$inputFieldsCount = count($DATA[$fileName][$this->defaultLanguage]) * (count($this->systemLanguages)+1);
 				$maxInputFields = (int)ini_get('max_input_vars');
 				if($inputFieldsCount >= $maxInputFields){
-					$this->addFlashMessage('Your field count: '.$inputFieldsCount.'<br>PHP ini "max_input_vars": '.$maxInputFields,'INCREASE INPUT FIELDS LIMIT','ERROR');
+					$this->addFlashMessage('Your field count: '.$inputFieldsCount.'<br>PHP ini "max_input_vars": '.$maxInputFields,'INCREASE INPUT FIELDS LIMIT',FlashMessage::ERROR);
 				} else if(($inputFieldsCount + 50) >= $maxInputFields){
-					$this->addFlashMessage('Your field count: '.$inputFieldsCount.'<br>PHP ini "max_input_vars": '.$maxInputFields,'INCREASE INPUT FIELDS LIMIT','WARNING');
+					$this->addFlashMessage('Your field count: '.$inputFieldsCount.'<br>PHP ini "max_input_vars": '.$maxInputFields,'INCREASE INPUT FIELDS LIMIT',FlashMessage::WARNING);
 				}
 
 			}
@@ -231,11 +241,10 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
     public function updateAction()
     {
 
-    	$currentLanguageFile = $this->getCurrentLanguageFile();
-    	if($currentLanguageFile){
+    	if($this->languageFilesConfiguration['current']){
 
     		//get data from filepath
-    		$fileData = $this->getExtensionAndFilenameFormPath($currentLanguageFile);
+    		$fileData = $this->getExtensionAndFilenameFormPath($this->languageFilesConfiguration['current']);
 
 			$xliff = $_POST['xliff'];
 
@@ -294,7 +303,7 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 
 			if(!empty($messages)){
 				$this->addFlashMessage('','XLF FILES SAVED');
-				$this->addFlashMessage(implode('<br />',$messages),'', 'INFO');
+				$this->addFlashMessage(implode('<br />',$messages),'', FlashMessage::INFO);
 				//clear language cache
 				if($this->extensionSettings['autoClearLangCacheBySave']){
 					$this->clearLanguageCache();
@@ -303,7 +312,7 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 		}
 		//no current language file selected
 		else {
-			$this->addFlashMessage('No langauge file selected as current','SAVING XLF FILES', 'WARNING');
+			$this->addFlashMessage('No langauge file selected as current','SAVING XLF FILES', FlashMessage::WARNING);
 		}
 
         $this->redirect('index');
@@ -322,10 +331,10 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 	        foreach($extensionsPosted as $extKey => $ext){
 
 	        	//continue if extension not currently loaded -- should not happen due previous check in extension listing
-                if(!\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded($extKey)){
+                if(!ExtensionManagementUtility::isLoaded($extKey)){
                     continue;
                 }
-	            $extPath = \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath($extKey);
+	            $extPath = ExtensionManagementUtility::extPath($extKey);
 	            //check if extension path exists
 	            if(is_dir($extPath)){
 	                $extLangPath = $extPath.'Resources/Private/Language/';
@@ -341,7 +350,7 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 							}
 							$langaugeFiles[] = $newFilePath;
 						} else {
-							$this->addFlashMessage($ext['cccc'].' not created','CONFIGURATION SAVED','ERROR');
+							$this->addFlashMessage($ext['cccc'].' not created','CONFIGURATION SAVED',FlashMessage::ERROR);
 						}
                     }
                     //check for files
@@ -358,31 +367,31 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 
             //save selected files to configuration file
             if(!empty($langaugeFiles)){
-	            file_put_contents($this->selectedLanguageFilesConfigurationFile,implode("\n",$langaugeFiles));
-	            $this->addFlashMessage('','CONFIGURATION SAVED');
-	            $this->addFlashMessage(implode('<br>',array_map(function($a){
-	            	$fileData = $this->getExtensionAndFilenameFormPath($a);
-	            	if(!empty($fileData)){
-	            		$strToReturn = '<strong>'.$fileData['extension'].'</strong> | '.$fileData['filename'];
-	            		return $strToReturn;
-					}
-				},$langaugeFiles)),'','INFO');
-	            $this->redirect('index');
+	        	$this->languageFilesConfiguration['selected'] = $langaugeFiles;
+	            $save = $this->saveLangaugeFilesConfiguration();
+	            if($save){
+					$this->addFlashMessage('','CONFIGURATION SAVED');
+					$this->addFlashMessage(implode('<br>',array_map(function($a){
+						$fileData = $this->getExtensionAndFilenameFormPath($a);
+						if(!empty($fileData)){
+							$strToReturn = '<strong>'.$fileData['extension'].'</strong> | '.$fileData['filename'];
+							return $strToReturn;
+						}
+					},$langaugeFiles)),'',FlashMessage::INFO);
+					$this->redirect('index');
+				}
             }
         }
 
-        //get selected files from configuration file
-        $selectedLanguageFiles = $this->getSelectedFilesFromConfiguration();
-
         //get all extensions in typo3conf/ext folder
-	    $extensionsList = glob(\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath(self::EXTKEY).'../*',GLOB_ONLYDIR);
+	    $extensionsList = glob(ExtensionManagementUtility::extPath(self::EXTKEY).'../*',GLOB_ONLYDIR);
 	    $extensions = array();
 
 	    //loop all extension folders
 	    foreach($extensionsList as $e){
 	        $extKey = basename($e);
 	        //continue if extension not loaded
-            if(!\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded($extKey)){
+            if(!ExtensionManagementUtility::isLoaded($extKey)){
                 continue;
             }
 	        $ext = array('ext' => $extKey);
@@ -395,7 +404,7 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
                     $clearedName = str_replace(self::EXTKEY.'/../','',$eF);
                     $basename = basename($eF);
                     if(substr($basename,2,1) != '.'){
-                        $ext['files'][] = array('filename' => $basename,'checked' => in_array($clearedName,$selectedLanguageFiles));
+                        $ext['files'][] = array('filename' => $basename,'checked' => in_array($clearedName,$this->languageFilesConfiguration['selected']));
                     }
                     if($basename == 'locallang_cccc.xlf'){
                         $ext['checked'] = true;
@@ -412,31 +421,27 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 
 	public function selectCurrentFileAction(){
 
-		$selectedLanguageFiles = $this->getSelectedFilesFromConfiguration();
-
 		//update current file for translations
 		if($this->request->hasArgument('currentFile')) {
 			$currentFile = $this->request->getArgument('currentFile');
 
-			//save current file for translation and redirect to index
+			//assign current file for translation and redirect to index
 			if($currentFile){
-				$test = file_put_contents($this->currentLanguageFile,$currentFile);
-				if($test) {
+				$this->languageFilesConfiguration['current'] = $currentFile;
+				$saved = $this->saveLangaugeFilesConfiguration();
+				if($saved) {
 					$this->addFlashMessage('current translation file assigned','CONFIGURATION SAVED');
 					$this->redirect('index');
 				}
 			}
 		}
 
-		//get current language file
-		$currentLanguageFile = $this->getCurrentLanguageFile();
-
 		$options = array();
 
 		//prepare options to select
-		foreach($selectedLanguageFiles as $slf){
+		foreach($this->languageFilesConfiguration['selected'] as $slf){
 			$checked = false;
-			if($slf == $currentLanguageFile){
+			if($slf == $this->languageFilesConfiguration['current']){
 				$checked = true;
 			}
 			$fileData = $this->getExtensionAndFilenameFormPath($slf);
@@ -458,32 +463,25 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 	}
 
 	/**
-	 * Get selected language files to translate from saved configuration file
-	 * @return array selected files
+	 * Get configuration from configuration file
+	 * @return mixed|null
 	 */
-    protected function getSelectedFilesFromConfiguration(){
-		$selectedLanguageFiles = array();
-		$selectedLanguageFilesFile = file_get_contents($this->selectedLanguageFilesConfigurationFile);
-		if($selectedLanguageFilesFile){
-			$selectedLanguageFiles = explode("\n",$selectedLanguageFilesFile);
-		}
-		return $selectedLanguageFiles;
-	}
-
-	/**
-	 * Get current assigned file for translation
-	 * @return null|string
-	 */
-	protected function getCurrentLanguageFile(){
-		if(is_file($this->currentLanguageFile)){
-			$currentLanguageFile = trim(file_get_contents($this->currentLanguageFile));
-			$selectedLanguageFiles = $this->getSelectedFilesFromConfiguration();
-			//check if file still in selected language files
-			if(in_array($currentLanguageFile,$selectedLanguageFiles)){
-				return $currentLanguageFile;
+	protected function getLanguageFilesConfiguration(){
+		if(is_file($this->configurationFile)){
+			$configuration = json_decode(trim(file_get_contents($this->configurationFile)),true);
+			if(is_array($configuration)){
+				return $configuration;
 			}
 		}
 		return NULL;
+	}
+
+	/**
+	 * Save configuration to file
+	 * @return bool|int
+	 */
+	protected function saveLangaugeFilesConfiguration(){
+		return file_put_contents($this->configurationFile,json_encode($this->languageFilesConfiguration));
 	}
 
 	/**
@@ -542,31 +540,6 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 			$this->addFlashMessage('','LANGUAGE CACHE CLEARED', 'INFO');
 		}
 	}
-
-    /**
-     * Add flash message - easier severity passing
-     *
-     * @param $message
-     * @param string $header
-     * @param string $severity
-     */
-    public function addFlashMessage($message,$header = '',$severity = 'OK', $storeInSession = TRUE){
-
-        $sev = array(
-            'NOTICE', 'INFO', 'OK', 'WARNING', 'ERROR'
-        );
-
-        if(in_array($severity,$sev)){
-
-            $message = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Messaging\\FlashMessage',
-                $message,
-                $header,
-                constant("\\TYPO3\\CMS\\Core\\Messaging\\FlashMessage::".$severity),
-                $storeInSession
-            );
-            $this->controllerContext->getFlashMessageQueue()->addMessage($message);
-        }
-    }
 
 }
 ?>
