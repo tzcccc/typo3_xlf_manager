@@ -71,7 +71,10 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
         //initialize paths for configuration files and cache folder
 		$configurationFolder = $thisExtensionFolderPath.'Configuration/';
         $extPathSplit = explode('typo3conf',$thisExtensionFolderPath);
-		$this->languageCacheFolder = $extPathSplit[0].'typo3temp/Cache/Data/l10n/';
+		//$this->languageCacheFolder = $extPathSplit[0].'typo3temp/Cache/Data/l10n/';
+		$this->languageCacheFolder = $extPathSplit[0].'typo3temp/var/Cache/Data/l10n/';
+
+		//\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionStringToArray(\TYPO3\CMS\Core\Utility\VersionNumberUtility::getCurrentTypo3Version())
 
 		//initialize language files configuration
 		$this->configurationFile = $configurationFolder.'languageFiles.json';
@@ -545,7 +548,7 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 			}
 		}
 		if($deletedFiles){
-			$this->addFlashMessage('','LANGUAGE CACHE CLEARED', 'INFO');
+			$this->addFlashMessage('','LANGUAGE CACHE CLEARED', FlashMessage::INFO);
 		}
 	}
 
