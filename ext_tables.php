@@ -26,13 +26,4 @@ if (TYPO3_MODE === 'BE') {
 	);
 
 }
-
-unset($GLOBALS['TCA']['sys_language']['columns']['static_lang_isocode']['displayCond']);
-//show static_lang_isocode field
-$GLOBALS['TCA']['sys_language']['columns']['static_lang_isocode']['config'] = array(
-	'type' => 'input',
-	'size' => 5,
-	'default' => 'en'
-);
-
 ?>

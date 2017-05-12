@@ -150,7 +150,7 @@
 												<span class="input-group-addon">
 													<f:if condition="{lang} != 'en'">
 														<f:then>
-															<f:render section="icon" arguments="{iconFullPath:'{typo3SitePath}typo3/sysext/core/Resources/Public/Icons/Flags/SVG/{f:format.case(mode:\'upper\',value:\'{lang}\')}.svg'}" />
+															<f:render section="icon" arguments="{iconFullPath:'{typo3SitePath}typo3/sysext/core/Resources/Public/Icons/Flags/SVG/{f:format.case(mode:\'upper\',value:\'{id.flag}\')}.svg'}" />
 														</f:then>
 														<f:else>
 															<f:render section="icon" arguments="{iconFullPath:'{typo3SitePath}typo3/sysext/core/Resources/Public/Icons/Flags/SVG/GB.svg'}" />

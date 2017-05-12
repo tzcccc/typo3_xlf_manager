@@ -43,9 +43,10 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 	protected $defaultLanguage = 'en';
 
 	/**
-	 * @var array additional languages
+	 * @var array additional languages and flags
 	 */
 	protected $systemLanguages = array();
+	protected $flagsByISOcode = array();
 
 	/**
 	 * configuration files
@@ -75,11 +76,12 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 		//initialize language files configuration
 		$this->configurationFile = $configurationFolder.'languageFiles.json';
 
-        //initialize system languages
-        $sql = "SELECT static_lang_isocode,flag FROM sys_language WHERE hidden = 0";
+        //initialize system languages and flags
+        $sql = "SELECT language_isocode,flag FROM sys_language WHERE hidden = 0";
         $res = $GLOBALS['TYPO3_DB']->sql_query($sql);
         while($row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res)){
-            $this->systemLanguages[$row['flag']] = $row['static_lang_isocode'];
+            $this->systemLanguages[$row['flag']] = $row['language_isocode'];
+            $this->flagsByISOcode[$row['language_isocode']] = $row['flag'];
         }
         //initialize default language from extension settings
         $this->extensionSettings = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][self::EXTKEY]);
@@ -93,6 +95,9 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
                 unset($this->systemLanguages[$lKey]);
             }
         }
+
+        //add flag for default language
+		$this->flagsByISOcode[$this->defaultLanguage] = $this->defaultLanguage;
     }
 
     public function initializeView(\TYPO3\CMS\Extbase\Mvc\View\ViewInterface $view) {
@@ -198,6 +203,8 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 					$subcat = $firstIdSplit[1];
 					$isFirst = true;
 					foreach($DATA[$fileName][$lang] as $id => $value){
+						//add flag
+						$DATA[$fileName][$lang][$id]['flag'] = $this->flagsByISOcode[$lang];
 						//explode id
 						$cats = explode('.',$id);
 						if($cat != $cats[0] || $isFirst){
