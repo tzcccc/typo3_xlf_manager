@@ -74,8 +74,6 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 		//$this->languageCacheFolder = $extPathSplit[0].'typo3temp/Cache/Data/l10n/';
 		$this->languageCacheFolder = $extPathSplit[0].'typo3temp/var/Cache/Data/l10n/';
 
-		//\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionStringToArray(\TYPO3\CMS\Core\Utility\VersionNumberUtility::getCurrentTypo3Version())
-
 		//initialize language files configuration
 		$this->configurationFile = $configurationFolder.'languageFiles.json';
 
@@ -105,7 +103,11 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 
     public function initializeView(\TYPO3\CMS\Extbase\Mvc\View\ViewInterface $view) {
 
-    	//check configuration file
+    	//determine typo3 version
+		$typo3Version = \TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionStringToArray(\TYPO3\CMS\Core\Utility\VersionNumberUtility::getCurrentTypo3Version());
+		$this->view->assign('typo3Version',$typo3Version);
+
+		//check configuration file
     	if(!is_file($this->configurationFile)){
 			$this->addFlashMessage('EXT:Configuration/languageFiles.json','Configuration JSON file missing!',FlashMessage::ERROR);
 		} else {
@@ -351,6 +353,10 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 	                $extLangPath = $extPath.'Resources/Private/Language/';
 	                //check if new file should be created
 	                if($ext['cccc']){
+	                	//create folder if not extists
+						if(!is_dir($extLangPath)){
+							mkdir($extLangPath);
+						}
 	                	//prepare filename
 	                	$newFilename = $localDriver->sanitizeFileName($ext['cccc']);
 	                	if($newFilename){
