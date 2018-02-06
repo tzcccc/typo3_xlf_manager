@@ -105,7 +105,7 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 
     public function initializeView(\TYPO3\CMS\Extbase\Mvc\View\ViewInterface $view) {
 
-    	//check configuration file
+		//check configuration file
     	if(!is_file($this->configurationFile)){
 			$this->addFlashMessage('EXT:Configuration/languageFiles.json','Configuration JSON file missing!',FlashMessage::ERROR);
 		} else {
@@ -351,6 +351,10 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 	                $extLangPath = $extPath.'Resources/Private/Language/';
 	                //check if new file should be created
 	                if($ext['cccc']){
+	                	//create folder if not extists
+						if(!is_dir($extLangPath)){
+							mkdir($extLangPath);
+						}
 	                	//prepare filename
 	                	$newFilename = $localDriver->sanitizeFileName($ext['cccc']);
 	                	if($newFilename){
