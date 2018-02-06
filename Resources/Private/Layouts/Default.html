@@ -1,7 +1,14 @@
 {namespace v=FluidTYPO3\Vhs\ViewHelpers}
 <f:be.container>
     <!-- Content -->
-    <script src="{typo3SitePath}typo3/sysext/core/Resources/Public/JavaScript/Contrib/jquery/jquery-3.2.1.min.js" type="text/javascript"></script>
+    <f:if condition="{typo3Version.version_main} == 7">
+        <f:then>
+            <script src="{typo3SitePath}typo3/sysext/core/Resources/Public/JavaScript/Contrib/jquery/jquery-2.1.4.min.js" type="text/javascript"></script>
+        </f:then>
+        <f:else>
+            <script src="{typo3SitePath}typo3/sysext/core/Resources/Public/JavaScript/Contrib/jquery/jquery-3.2.1.min.js" type="text/javascript"></script>
+        </f:else>
+    </f:if>
 
     <f:comment>
         <!-- no need for 8.7.1 -->
