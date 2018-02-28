@@ -60,21 +60,32 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 	protected $extensionSettings = array();
 
 	/**
-	 * path to TYPO3 language cache folder
+	 * @var path to TYPO3 language cache folder
 	 */
 	protected $languageCacheFolder;
 
+    /**
+     * @var TYPO3 version
+     */
+	protected $typo3Version;
+
     public function initializeAction(){
+
+        //determine typo3 version
+        $this->typo3Version = \TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionStringToArray(\TYPO3\CMS\Core\Utility\VersionNumberUtility::getCurrentTypo3Version());
 
     	$thisExtensionFolderPath = ExtensionManagementUtility::extPath(self::EXTKEY);
 
         //initialize paths for configuration files and cache folder
 		$configurationFolder = $thisExtensionFolderPath.'Configuration/';
         $extPathSplit = explode('typo3conf',$thisExtensionFolderPath);
-		//$this->languageCacheFolder = $extPathSplit[0].'typo3temp/Cache/Data/l10n/';
-		$this->languageCacheFolder = $extPathSplit[0].'typo3temp/var/Cache/Data/l10n/';
+        //setup language cache folder
+        $this->languageCacheFolder = $extPathSplit[0].'typo3temp/var/Cache/Data/l10n/';
+        if($this->typo3Version['version_main'] < 8){
+            $this->languageCacheFolder = $extPathSplit[0].'typo3temp/Cache/Data/l10n/';
+        }
 
-		//initialize language files configuration
+        //initialize language files configuration
 		$this->configurationFile = $configurationFolder.'languageFiles.json';
 
         //initialize system languages and flags
@@ -103,9 +114,8 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 
     public function initializeView(\TYPO3\CMS\Extbase\Mvc\View\ViewInterface $view) {
 
-    	//determine typo3 version
-		$typo3Version = \TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionStringToArray(\TYPO3\CMS\Core\Utility\VersionNumberUtility::getCurrentTypo3Version());
-		$this->view->assign('typo3Version',$typo3Version);
+
+		$this->view->assign('typo3Version',$this->typo3Version);
 
 		//check configuration file
     	if(!is_file($this->configurationFile)){
