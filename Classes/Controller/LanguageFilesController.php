@@ -49,12 +49,6 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 	protected $flagsByISOcode = array();
 
 	/**
-	 * configuration files
-	 */
-	protected $configurationFile;
-	protected $languageFilesConfiguration;
-
-	/**
 	 * @var array extension settings
 	 */
 	protected $extensionSettings = array();
@@ -116,13 +110,6 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 
 
 		$this->view->assign('typo3Version',$this->typo3Version);
-
-		//check configuration file
-    	if(!is_file($this->configurationFile)){
-			$this->addFlashMessage('EXT:Configuration/languageFiles.json','Configuration JSON file missing!',FlashMessage::ERROR);
-		} else {
-			$this->languageFilesConfiguration = $this->getLanguageFilesConfiguration();
-		}
 
     	//assign css and js file for every action
 		$this->view->assign('cssFile',ExtensionManagementUtility::extRelPath(self::EXTKEY).'Resources/Public/css/styles.css');
@@ -398,12 +385,9 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 
             //save selected files to configuration file
             if(!empty($languageFiles)){
-	        	$this->languageFilesConfiguration['selected'] = $languageFiles;
 
 	        	//save to database
                 $save = $this->setSelectedFiles($languageFiles);
-
-	            //$save = $this->saveLangaugeFilesConfiguration();
 	            if($save){
 					$this->addFlashMessage('','CONFIGURATION SAVED');
 					$this->addFlashMessage(implode('<br>',array_map(function($a){
@@ -580,28 +564,6 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
         $res = $GLOBALS['TYPO3_DB']->sql_query($sql);
         return $res;
     }
-
-	/**
-	 * Get configuration from configuration file
-	 * @return mixed|null
-	 */
-	protected function getLanguageFilesConfiguration(){
-		if(is_file($this->configurationFile)){
-			$configuration = json_decode(trim(file_get_contents($this->configurationFile)),true);
-			if(is_array($configuration)){
-				return $configuration;
-			}
-		}
-		return NULL;
-	}
-
-	/**
-	 * Save configuration to file
-	 * @return bool|int
-	 */
-	protected function saveLangaugeFilesConfiguration(){
-		return file_put_contents($this->configurationFile,json_encode($this->languageFilesConfiguration));
-	}
 
 	/**
 	 * Get extension name and file name from language file path
