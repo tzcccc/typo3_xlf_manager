@@ -158,20 +158,23 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 			$this->addFlashMessage('If you want to use default language other than "English" you need to extend locales language list by "en" => "English" in TYPO3\CMS\Core\Localization\Locales::$languages to be able to use "en.locallang.xlf" files.','LOCALES ADJUSTMENT NEEDED!',FlashMessage::ERROR);
 		}
 
+		$selectedFiles = $this->getSelectedFiles();
+		$currentFile = $this->getCurrentFile();
+
 		//check if files assigned
-		if(!empty($this->languageFilesConfiguration['selected'])){
+		if(!empty($selectedFiles)){
 			$this->view->assign('filesAssigned',true);
 		}
 
-		if($this->languageFilesConfiguration['current'] && is_file($this->languageFilesConfiguration['current'])){
+		if($currentFile && is_file($currentFile)){
 
-			$fileData = $this->getExtensionAndFilenameFormPath($this->languageFilesConfiguration['current']);
+			$fileData = $this->getExtensionAndFilenameFormPath($currentFile);
 
 			$fileName = $fileData['filename'];
 
 			$DATA = array();
 
-			$xml = simplexml_load_file($this->languageFilesConfiguration['current']);
+			$xml = simplexml_load_file($currentFile);
 
 			$elements = $xml->xpath('//trans-unit');
 			if($elements){
@@ -199,11 +202,6 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 				}
 				$DATA[$fileName][$lang] = array_merge_recursive($DATA[$fileName][$this->defaultLanguage],$DATA[$fileName][$lang]);
 			}
-
-			/* echo '<pre>';
-					 var_dump($DATA);
-			 echo '</pre>';*/
-
 
 
 			//sort ids by name
@@ -258,16 +256,18 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
         $this->systemLanguages = array($this->defaultLanguage => $this->defaultLanguage) + $this->systemLanguages;
 
         $this->view->assign('languages',$this->systemLanguages);
+        $this->view->assign('currentFile',$currentFile);
 
 	}
 
-    public function updateAction()
-    {
+    public function updateAction() {
 
-    	if($this->languageFilesConfiguration['current']){
+	    $fileToUpdate = $_POST['currentFile'];
+
+    	if($fileToUpdate){
 
     		//get data from filepath
-    		$fileData = $this->getExtensionAndFilenameFormPath($this->languageFilesConfiguration['current']);
+    		$fileData = $this->getExtensionAndFilenameFormPath($fileToUpdate);
 
 			$xliff = $_POST['xliff'];
 
@@ -285,6 +285,8 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 			$messages = array();
 			//save as xml to .xlf
 			foreach ($DATA as $fileName => $file) {
+
+			    $xmlDataForAllLanguages = [];
 				foreach ($this->systemLanguages as $lang) {
 
 					$xmlString = $this->getXLIFFDefaultXML($lang);
@@ -319,9 +321,11 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 					}
 					$test = file_put_contents($fileData['folder'].$langPrefix.$fileData['filename'],$xmlStringToSave);
 					if($test){
+					    $xmlDataForAllLanguages[$langPrefix] = $xmlStringToSave;
 						$messages[] = $langPrefix.$fileData['filename'];
 					}
 				}
+                $this->backupFileContents($fileToUpdate, serialize($xmlDataForAllLanguages));
 			}
 
 			if(!empty($messages)){
@@ -458,8 +462,8 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 
 			//assign current file for translation and redirect to index
 			if($currentFile){
-				$this->languageFilesConfiguration['current'] = $currentFile;
-				$saved = $this->saveLangaugeFilesConfiguration();
+
+				$saved = $this->setCurrentFile($currentFile);
 				if($saved) {
 					$this->addFlashMessage('current translation file assigned','CONFIGURATION SAVED');
 					$this->redirect('index');
@@ -470,9 +474,9 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 		$options = array();
 
 		//prepare options to select
-		foreach($this->languageFilesConfiguration['selected'] as $slf){
+		foreach($this->getSelectedFiles() as $slf){
 			$checked = false;
-			if($slf == $this->languageFilesConfiguration['current']){
+			if($slf == $this->getCurrentFile()){
 				$checked = true;
 			}
 			$fileData = $this->getExtensionAndFilenameFormPath($slf);
@@ -492,6 +496,16 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 		$this->clearLanguageCache();
 		$this->redirect('index');
 	}
+
+    /**
+     * Save xlf file content to database for backup purpose
+     * @param $file
+     * @param $serializedXmlContent
+     */
+	protected function backupFileContents($file, $serializedXmlContent){
+        $sql = "UPDATE tx_typo3xlfmanager_model_domain_file SET xmlcontent = '".$serializedXmlContent."' WHERE filename='".$file."'";
+        $GLOBALS['TYPO3_DB']->sql_query($sql);
+    }
 
     /**
      * Get array of selected files
@@ -550,6 +564,21 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
         $res = $GLOBALS['TYPO3_DB']->sql_query($sql);
         $row = $GLOBALS['TYPO3_DB']->sql_fetch_assoc($res);
         return $row['filename'];
+    }
+
+    /**
+     * Flag file as current
+     * @param $file
+     * @return mixed
+     */
+    protected function setCurrentFile($file){
+        //set previous current to not current
+        $sql = "UPDATE tx_typo3xlfmanager_model_domain_file SET is_current = 0 WHERE is_current = 1";
+        $GLOBALS['TYPO3_DB']->sql_query($sql);
+        //set new current
+        $sql = "UPDATE tx_typo3xlfmanager_model_domain_file SET is_current = 1 WHERE filename = '".$file."'";
+        $res = $GLOBALS['TYPO3_DB']->sql_query($sql);
+        return $res;
     }
 
 	/**
