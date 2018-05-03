@@ -263,7 +263,10 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 			//parse posted data
 			foreach ($xliff as $key => $val) {
 				$s = explode('__', $key);
-				$DATA[$s[0]][$s[1]][$s[2]] = trim($val);
+				//filter out empty language key
+				if($s[0]){
+					$DATA[$s[0]][$s[1]][$s[2]] = trim($val);
+				}
 			}
 
 			array_unshift($this->systemLanguages,$this->defaultLanguage);
@@ -485,10 +488,13 @@ class LanguageFilesController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
      * Save xlf file content to database for backup purpose
      * @param $file
      * @param $serializedXmlContent
+	 * @return boolean
      */
 	protected function backupFileContents($file, $serializedXmlContent){
-        $sql = "UPDATE tx_typo3xlfmanager_model_domain_file SET xmlcontent = '".$serializedXmlContent."' WHERE filename='".$file."'";
-        $GLOBALS['TYPO3_DB']->sql_query($sql);
+		return $GLOBALS['TYPO3_DB']->exec_UPDATEquery( 'tx_typo3xlfmanager_model_domain_file'
+			, "filename='".$file."'"
+			, array('xmlcontent' => $serializedXmlContent)
+		);
     }
 
     /**
