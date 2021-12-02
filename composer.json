@@ -1,0 +1,17 @@
+{
+  "name": "tzcccc/typo3_xlf_manager",
+  "type": "typo3-cms-extension",
+  "description": "Extension for managing xliff files trough all installed typo3 extensions",
+  "authors": [
+    {
+      "name": "Tomas Zdrazil",
+      "role": "Developer",
+      "homepage": "t.zdrazil@medi.de"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "CCCC\\Typo3XlfManager\\": "Classes"
+    }
+  }
+}
