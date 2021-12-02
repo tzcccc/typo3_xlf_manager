@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.2.0] - 2021-12-02
+### Added
+- composer support
+
 ## [1.1.0] - 2018-05-03
 ### Fixed
 - saving current file by posting filename - not getting from configuration file - this caused multiuser conflict by saving content to wrong file
